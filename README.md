@@ -4,4 +4,7 @@
 Here is a screenshot
 ![screenshot](/quick-start.gif)
 
-Please download the tool from this url
+Download it.
+
+
+https://github.com/maye-msft/azure-bot-playground/raw/master/azure-bot-playground-win32-x64.zip
