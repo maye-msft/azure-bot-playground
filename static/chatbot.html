@@ -1,0 +1,48 @@
+<html>
+        <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <meta name="description" content="">
+                <meta name="author" content="">
+                </head>
+<body>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="/node_modules/botframework-webchat/botchat.css" rel="stylesheet" />
+    <div id="bot" />
+    <script src="/node_modules/botframework-webchat/botchat.js"></script>
+    <script>
+        
+
+        // Connection settings
+        const botConnectionSettings = new BotChat.DirectLine({
+            domain: 'http://localhost:3000/directline',
+            webSocket: false // defaults to true
+        });
+
+        BotChat.App({
+            directLine: {
+                secret: '',
+                token: '',
+                domain: 'http://localhost:3000/directline',
+                webSocket: false // defaults to true
+            },
+            user: { id: 'userid', name: 'User' },
+            bot: { id: 'botid' },
+            resize: 'detect'
+        }, document.getElementById("bot"));
+
+        botConnectionSettings.postActivity({
+            type: 'event',
+            from: { id: 'userid' },
+            locale:  window.navigator.language,
+            name: 'myCustomEvent',
+            value: 'test'
+        }).subscribe(function (id) { console.log('event sent'); });
+
+    </script>
+</body>
+
+</html>

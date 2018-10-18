@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <style>
+        html,
+        body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+
+        }
+
+
+        iframe {
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        #app {
+            padding-bottom: 2px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid" id="app" style="height: 100%;">
+        <nav class="navbar navbar-dark bg-dark fixed-top w-100">
+            <a class="navbar-brand" href="#">
+                Azure Bot 4.0 Playground
+            </a>
+            <form class="form-inline my-2 my-lg-0">
+                <button :class="'btn btn-sm btn-success my-2 my-sm-0 mr-1 '+(dialogs.length>0?'':'disabled')" type="button"
+                    @click="postModel()">Preview</button>
+
+            </form>
+
+
+        </nav>
+        <div class="row" style="height: 100%;padding-top: 80px">
+            <div class="col-sm" style="overflow-y:auto;">
+
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Dialog Editor</h5>
+                        <p class="card-text">
+                            Add Dialogs in the Bot -&gt; Add Activities in the Dialogs -&gt; Click Preview to Try
+                            <br>
+                            Type 'cancel' to cancel dialog. Type 'bye' to leave conversation.
+                        </p>
+                        <a href="#" class="btn btn-sm btn-primary" @click="addDialog()">Add Dialog</a>
+                        <a href="#" class="btn btn-sm btn-info" @click="exportDialogs()">Export</a>
+                        <a href="#" class="btn btn-sm btn-info" @click="importDialogs()">Import</a>
+                    </div>
+
+                    <div class="card-body p-1" v-if="dialogs.length>0">
+                        <div class="accordion mt-3" id="accordionDialog">
+
+
+
+                            <div class="card " v-for="(dialog, dialogIdx) in dialogs">
+                                <div class="card-header" id="headingOne">
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link" type="button" data-toggle="collapse" :data-target="'#collapse'+dialogIdx"
+                                            aria-expanded="true" :aria-controls="'collapse'+dialogIdx">
+                                            {{dialog.name}}
+                                        </button>
+                                    </h5>
+                                </div>
+
+                                <div :id="'collapse'+dialogIdx" class="collapse" :aria-labelledby="'heading'+dialogIdx"
+                                    data-parent="#accordionDialog">
+                                    <div class="card-body p-3">
+                                        <form>
+                                            <div class="form-group">
+                                                <label :for="'dialogName'+dialogIdx">Dialog Name</label>
+                                                <input type="text" class="form-control" :id="'dialogName'+dialogIdx"
+                                                    placeholder="Dialog Name" v-model="dialog.name">
+                                            </div>
+                                            <div class="form-group">
+                                                <label :for="'dialoggreeting'+dialogIdx">Greeting Message (optional)</label>
+                                                <textarea row="3" class="form-control" :id="'dialoggreeting'+dialogIdx"
+                                                    placeholder="Dialog Greeting" v-model="dialog.greeting"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label :for="'dialogending'+dialogIdx">Ending Message (optional)</label>
+                                                <textarea row="3" class="form-control" :id="'dialogending'+dialogIdx"
+                                                    placeholder="Dialog Ending" v-model="dialog.ending"></textarea>
+                                            </div>
+                                        </form>
+
+                                        <!-- <ul class="list-group list-group-flush"> -->
+                                        <template v-for="(activity, activityIdx) in dialog.activities">
+
+                                            <form class="shadow p-2 border mb-3">
+                                                <h5>Activity #{{activityIdx+1}}</h5>
+                                                <div class="form-group">
+                                                    <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-type'">Type</label>
+                                                    <select class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-type'"
+                                                        v-model="activity.type">
+                                                        <optgroup label="prompt">
+                                                            <option>text</option>
+                                                            <option>number</option>
+                                                            <option>choice</option>
+                                                            <option>confirm</option>
+                                                            <option>datetime</option>
+                                                            <option>dialog-menu</option>
+                                                        </optgroup>
+                                                        <optgroup label="advanced">
+                                                            <option>LUIS</option>
+                                                            <option>QnA</option>
+                                                            <option>REST API</option>
+                                                        </optgroup>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-message'">Message</label>
+                                                    <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-message'"
+                                                        placeholder="activity message" v-model="activity.message">
+                                                </div>
+                                                <div class="form-group" v-if="activity.type=='choice'">
+                                                    <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-options'">Options</label>
+                                                    <div class="input-group mt-1" v-for="(option, optionIdx) in activity.options">
+                                                        <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-option-'+optionIdx"
+                                                            :key="'activity-'+'dialogIdx'+'-'+activityIdx+'-option-'+optionIdx"
+                                                            placeholder="activity option" v-model="activity.options[optionIdx]">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-outline-danger" @click="removeOption(activity, optionIdx)"
+                                                                type="button" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-removeoption-'+optionIdx">Remove</button>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <hr>
+                                                    <button class="btn btn-sm btn-primary" type="button" @click="addOption(activity)">
+                                                        Add Option
+                                                    </button>
+
+                                                </div>
+
+                                                <div class="form-group" v-if="activity.type=='dialog-menu'">
+                                                    <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-items'">Items</label>
+                                                    <div class="input-group mt-1" v-for="(item, itemIdx) in activity.menuitems">
+                                                        <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-item-'+itemIdx"
+                                                            :key="'activity-'+'dialogIdx'+'-'+activityIdx+'-item-'+itemIdx"
+                                                            placeholder="activity option" v-model="activity.menuitems[itemIdx]">
+                                                        <select class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-itemdialog-'+itemIdx"
+                                                            v-model="activity.menuitemdialogs[itemIdx]">
+                                                            <option v-for="(menudialog, menudialogIdx) in dialogs"
+                                                                :value="menudialog.name" v-html="menudialog.name" :key="'activity-'+'dialogIdx'+'-'+activityIdx+'-itemdialog-'+menudialogIdx"></option>
+                                                        </select>
+
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-outline-danger" @click="removeMenuItem(activity, itemIdx)"
+                                                                type="button" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-removeitem-'+itemIdx">Remove</button>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <hr>
+                                                    <button class="btn btn-sm btn-primary" type="button" @click="addMenuItem(activity)">
+                                                        Add Item
+                                                    </button>
+
+                                                </div>
+                                                <template v-if="activity.type=='QnA'">
+                                                    <div class="form-group">
+                                                        <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-KBId'">Knowledge
+                                                            Base Id</label>
+                                                        <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-KBId'"
+                                                            placeholder="Knowledge Base Id" v-model="activity.qna_kbid">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-endpointKey'">Endpoint
+                                                            Key</label>
+                                                        <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-endpointKey'"
+                                                            placeholder="Endpoint Key" v-model="activity.qna_endpointKey">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label :for="'activity-'+'dialogIdx'+'-'+activityIdx+'-hostname'">Host
+                                                            Name</label>
+                                                        <input type="text" class="form-control" :id="'activity-'+'dialogIdx'+'-'+activityIdx+'-hostname'"
+                                                            placeholder="Host Name" v-model="activity.qna_hostname">
+                                                    </div>
+                                                </template>
+
+                                                <div class="form-group">
+                                                    <button class="btn btn-sm btn-danger" type="button" @click="dialog.activities.splice(activityIdx, 1)">
+                                                        Remove Activity
+                                                    </button>
+
+                                                </div>
+                                            </form>
+                                        </template>
+                                        <!-- </ul> -->
+
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-primary" type="button" @click="dialog.activities.push({type:'text', message:'Please input', options:['option 1','option 2']})">
+                                            Add Activity
+                                        </button>
+                                        <button class="btn btn-sm  btn-danger" type="button" @click="dialogs.splice(dialogIdx, 1)">
+                                            Remove Dialog
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm" style="height: 100%;">
+                <iframe width="100%" height="100%" src="./chatbot.html" id="chatbox">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        window.jQuery = window.$ = require('jquery');
+    </script>
+    <script src="/node_modules/jquery/dist/jquery.js"></script>
+
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/node_modules/vue/dist/vue.min.js"></script>
+    <script src="/node_modules/vuex/dist/vuex.min.js"></script>
+    <script src="/node_modules/vue-router/dist/vue-router.min.js"></script>
+    <script src="/node_modules/axios/dist/axios.min.js"></script>
+    <script src="FileSaver.js"></script>
+
+    <script src="index.js"></script>
+
+</body>
+
+</html>
