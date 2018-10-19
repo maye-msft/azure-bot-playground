@@ -5,8 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "node ./index.js",
-    "start-electron": "./node_modules/.bin/electron .",
-    "build-electron": "./node_modules/.bin/electron-packager . --overwrite",
+    "start-app": "./node_modules/.bin/electron .",
+    "build-app": "./node_modules/.bin/electron-packager . --overwrite",
     "watch": "nodemon ./index.js",
     "eslint": "./node_modules/.bin/eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"

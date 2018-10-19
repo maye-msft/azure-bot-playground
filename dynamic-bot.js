@@ -18,33 +18,6 @@ class DynamicBot {
         this.dialogNames = [];
 
         this.rootDialog = null;
-
-        // let instance = this;
-        // this.dialogs.add(new WaterfallDialog('mainMenu', [
-        //     // async function (step) {
-        //     //     // Welcome the user and send a prompt.
-        //     //     await step.context.sendActivity("Welcome to Azure Bot Playground");
-        //     //     return await step.prompt('choicePrompt', "Choose dialog you will start?", instance.dialogNames);
-        //     // },
-        //     // async function (step) {
-        //     //     // Handle the user's response to the previous prompt and branch the dialog.
-        //     //     //instance.dialogNames.forEach(item => {
-        //     //     for(let i=0;i<instance.dialogNames.length;i++) {    
-        //     //         if(step.result.value==instance.dialogNames[i]){
-        //     //             return await step.beginDialog(instance.dialogNames[i]);
-        //     //         }
-        //     //     }
-        //     //     //})
-        //     // },
-        //     async function (step) {
-        //         // Calling replaceDialog will loop the main menu
-        //         return await step.replaceDialog(instance.rootDialog);
-        //     },
-        //     async function (step) {
-        //         // Calling replaceDialog will loop the main menu
-        //         return await step.replaceDialog('mainMenu');
-        //     }
-        // ]));
     }
     initDialogs() {
         this.dialogs = new DialogSet(this.dialogState);
@@ -214,15 +187,7 @@ class DynamicBot {
                     return await step.prompt('choicePrompt', activity.message, activity.menuitems);
 
                 });
-            array.push(async function (step) {
-                if (step.result.value.match(/cancel/ig)) {
-                    await step.context.sendActivity("cancelled");
-                    return await step.endDialog();
 
-                } else {
-                    return step.continueDialog();
-                }
-            });
             array.push(
                 async function (step) {
                     let result = null;
@@ -233,6 +198,7 @@ class DynamicBot {
                             return await step.beginDialog(activity.menuitemdialogs[i]);
                         }
                     }
+                    
 
                     //});
                 });
@@ -297,14 +263,9 @@ class DynamicBot {
 
 
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate) {
-            //if (turnContext.activity.membersAdded.length !== 0) {
-            //    for (var idx in turnContext.activity.membersAdded) {
-            //        if (turnContext.activity.membersAdded[idx].id !== turnContext.activity.recipient.id) {
-            // Start the dialog.
+
             await dc.beginDialog(this.rootDialog);
-            //        }
-            //    }
-            //}
+
         }
 
         // Save state changes
